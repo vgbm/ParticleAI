@@ -4,6 +4,7 @@
 #include <time.h> 
 
 #define numMoves 14
+#define numParticles 5
 #define goalX 10
 #define goalY 2
 
@@ -11,9 +12,14 @@ typedef struct{
 
 	int pX;
 	int pY;
-	int moves[numMoves];
+	char *moves[numMoves];
 	
 } Particle;
+
+
+typedef enum{
+	LEFT,RIGHT,UP,DOWN
+} Direction;
 
 
 Particle makeMoveList(Particle p){
@@ -22,55 +28,129 @@ Particle makeMoveList(Particle p){
 	
 	for(i=0;i<numMoves;i++){
 	
-		p.moves[i] = rand()%4+1;
+		
 		
 	}
 	
 	return p;
 }
 
-Particle calcPosition(Particle p){
+void execMoves( Particle p ){ //use either randMove or doNothing if the correct params don't pop up
 
-	int i;
-	
-	p.pX=0;
-	p.pY=0;
-	
-	for(i=0;i<numMoves;i++){
+}
 
-		switch(p.moves[i]){
-			
-			case 1:
-				p.pX--;
-				break;
-				
-			case 2:
-				p.pX++;
-				break;
-				
-			case 3:
-				p.pY++;
-				break;
-				
-			case 4:
-				p.pY--;
-				break;
-				
-			default:
-				perror("There is a severe problem...");
-				break;
-			
-		}
-	
-	}
+Particle teleport(int x, int y, Particle p){
+
+	p.pX=x;
+	p.pY=y;
 	
 	return p;
 
 }
 
-float calcDist(Particle p){
+Particle move(Direction dir, int steps, Particle p){
 
-	p = calcPosition(p);
+	switch(dir){
+	
+	case LEFT:
+		p.pX-=steps;
+		break;
+		
+	case RIGHT:
+		p.pX+=steps;
+		break;
+		
+	case UP:
+		p.pY+=steps;
+		break;
+		
+	case DOWN:
+		p.pY-=steps;
+		break;
+	
+	}
+	return p;
+}
+
+Particle randMove(Particle p){
+
+	Direction dir = genDirRand();
+	int steps = genStepsRand();
+	
+	p = move(dir,steps,p);
+	
+	return p;
+}
+
+int genDirRand(void){
+
+	Direction dir =  rand()%4+1;
+	return  dir;
+
+}
+
+int genStepsRand(void){
+
+	return rand()%10+1;
+
+}
+
+Direction genDirByGoal(Particle p){
+
+	int biggestGap = abs((goalX-p.pX));
+	Direction dir;
+	
+	if( (abs(goalY-p.pY)) > biggestGap ){
+	
+		if( (goalY-p.pY) < 0){
+		
+			dir = DOWN;
+
+		}
+		
+		else{
+		
+			dir=UP;
+		
+		}
+	}
+
+	else{
+	
+		if( (goalX-p.pX) < 0){
+		
+			dir = LEFT;
+		
+		}
+		
+		else{
+		
+			dir = RIGHT;
+		
+		}
+		
+	}
+	
+	return dir;
+}
+
+int genStepsByDist(Particle p){
+
+	Direction dir = genDirByGoal(p);
+	
+	if( dir == LEFT || dir == RIGHT ){
+		return abs(goalX - p.pX);
+	}
+	
+	else{
+		return abs(goalY - p.pY);
+	}
+}
+
+void doNothing( void ){ }// an option to waste your turn or can be forced if the move to execute does not have the correct params
+
+
+float calcDist(Particle p){
 	
 	return sqrt( pow( p.pX-goalX,2 ) + pow( p.pY-goalY,2 ) ); //distance formula
 
@@ -80,30 +160,6 @@ void PrintMoveSet(Particle p){
 
 	int i;
 	for(i=0;i<numMoves;i++){
-	
-		switch(p.moves[i]){
-		
-			case 1:
-				printf("LEFT\t");
-				break;
-				
-			case 2:
-				printf("RIGHT\t");
-				break;
-				
-			case 3:
-				printf("UP\t");
-				break;
-				
-			case 4:
-				printf("DOWN\t");
-				break;
-				
-			default:
-				perror("Error in PrintMoveSet");
-				break;
-		
-		}
 		
 	}
 	
@@ -111,41 +167,32 @@ void PrintMoveSet(Particle p){
 
 }
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[]){	//things to repair:: Main, printMoveSet, makeMoveList, and execMoves;
 
 	srand (time(NULL));
 	
-	Particle p1, p2;
+	Particle particles[numParticles];
 	float smallestDist,tempDist;
 	int genCount, i;
 	
+	
+	for(i=0;i<numParticles;i++){ //initialize starting position of all particles
+	
+		particles[i].pX=0;
+		particles[i].pY=0;
+		
+	}
+	
 	if(argc == 2){
+	
 		genCount = atoi(argv[1]);
 	
 		printf("\n");
-		p1 = makeMoveList(p1);
-
-		smallestDist = calcDist(p1);
 	
 		for(i=0;i<genCount;i++){
 		
 			printf("\n\n====================Generation %d====================\n\n",i+1);
 		
-			p2 = makeMoveList(p2);
-			tempDist = calcDist(p2);
-		
-			if(tempDist<smallestDist){
-		
-				smallestDist = tempDist;
-				p1 = p2;
-			
-			}
-		
-			PrintMoveSet(p1);
-		
-			if(smallestDist==0){
-				break;
-			}
 		}
 	
 		printf("Closest Dist: %f",smallestDist);
