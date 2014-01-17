@@ -57,7 +57,7 @@ Particle calcPosition(Particle p){
 				break;
 				
 			default:
-				printf("There is a severe problem...");
+				perror("There is a severe problem...");
 				break;
 			
 		}
@@ -100,7 +100,7 @@ void PrintMoveSet(Particle p){
 				break;
 				
 			default:
-				printf("Error in PrintMoveSet");
+				perror("Error in PrintMoveSet");
 				break;
 		
 		}
@@ -118,7 +118,6 @@ int main(int argc, char *argv[]){
 	Particle p1, p2;
 	float smallestDist,tempDist;
 	int genCount, i;
-	
 	
 	if(argc == 2){
 		genCount = atoi(argv[1]);
