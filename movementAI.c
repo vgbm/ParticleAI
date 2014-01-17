@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <time.h> 
 
-#define numMoves 10
-#define goalX 5
-#define goalY 0
+#define numMoves 14
+#define goalX 10
+#define goalY 2
 
 typedef struct{
 
@@ -67,7 +67,7 @@ Particle calcPosition(Particle p){
 				break;
 				
 			default:
-				//printf("%d\n",p.moves[i]);
+				printf("There is a severe problem...");
 				break;
 			
 		}
@@ -81,7 +81,6 @@ Particle calcPosition(Particle p){
 float calcDist(Particle p){
 
 	p = calcPosition(p);
-	//float dist = sqrt( pow( p.pX-goalX,2 ) + pow( p.pY-goalY,2 ) );
 	
 	return sqrt( pow( p.pX-goalX,2 ) + pow( p.pY-goalY,2 ) ); //distance formula
 
@@ -91,7 +90,31 @@ void PrintMoveSet(Particle p){
 
 	int i;
 	for(i=0;i<numMoves;i++){
-		printf("%d\t",p.moves[i]);
+	
+		switch(p.moves[i]){
+		
+			case 1:
+				printf("LEFT\t");
+				break;
+				
+			case 2:
+				printf("RIGHT\t");
+				break;
+				
+			case 3:
+				printf("UP\t");
+				break;
+				
+			case 4:
+				printf("DOWN\t");
+				break;
+				
+			default:
+				printf("Error in PrintMoveSet");
+				break;
+		
+		}
+		
 	}
 	
 	printf("\n");
