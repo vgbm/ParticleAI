@@ -121,38 +121,41 @@ int main(int argc, char *argv[]){
 	
 	if(argc == 2){
 		genCount = atoi(argv[1]);
+	
+		printf("\n");
+		p1 = makeMoveList(p1);
+
+		smallestDist = calcDist(p1);
+	
+		for(i=0;i<genCount;i++){
+		
+			printf("\n\n====================Generation %d====================\n\n",i+1);
+		
+			p2 = makeMoveList(p2);
+			tempDist = calcDist(p2);
+		
+			if(tempDist<smallestDist){
+		
+				smallestDist = tempDist;
+				p1 = p2;
+			
+			}
+		
+			PrintMoveSet(p1);
+		
+			if(smallestDist==0){
+				break;
+			}
+		}
+	
+		printf("Closest Dist: %f",smallestDist);
+		
 	}
+	
 	else{
 		printf("Bad input");
 	}
 	
-	printf("\n");
-	p1 = makeMoveList(p1);
-
-	smallestDist = calcDist(p1);
-	
-	for(i=0;i<genCount;i++){
-		
-		printf("\n\n====================Generation %d====================\n\n",i+1);
-		
-		p2 = makeMoveList(p2);
-		tempDist = calcDist(p2);
-		
-		if(tempDist<smallestDist){
-		
-			smallestDist = tempDist;
-			p1 = p2;
-			
-		}
-		
-		PrintMoveSet(p1);
-		
-		if(smallestDist==0){
-			break;
-		}
-	}
-	
-	printf("Closest Dist: %f",smallestDist);
 	
 	return 0;
 }
