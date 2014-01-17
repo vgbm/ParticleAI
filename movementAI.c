@@ -15,24 +15,14 @@ typedef struct{
 	
 } Particle;
 
-typedef enum{
-
-	LEFT=1,
-	RIGHT,
-	UP,
-	DOWN
-	
-} Direction;
 
 Particle makeMoveList(Particle p){
 
 	int i;
-	Direction dir;
 	
 	for(i=0;i<numMoves;i++){
 	
-		dir = rand()%4+1;
-		p.moves[i]=dir;
+		p.moves[i] = rand()%4+1;
 		
 	}
 	
