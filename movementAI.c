@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <time.h> 
 
-#define numMoves 4
-#define numParticles 3
+#define numMoves 5
+#define numParticles 4
 #define goalX 21
 #define goalY -19
 #define numDifMoves 14
@@ -25,9 +25,10 @@ typedef struct{
 	
 } Particle;
 
-
+//Various Meta methods
 Particle makeMoveList(Particle p);
 Particle mutateMoves(Particle p);
+Particle singleMutation(Particle p);
 Particle initParticle(Particle p);
 Particle execMoves( Particle p );
 float calcDist(Particle p);
@@ -50,6 +51,7 @@ Particle randTeleX( Particle p );
 Particle randTeleY( Particle p );
 Particle goalTeleX( Particle p );
 Particle goalTeleY( Particle p );
+Particle resetTele( Particle p );
 
 
 int main(int argc, char *argv[]){
@@ -62,7 +64,7 @@ int main(int argc, char *argv[]){
 	bestParticle = execMoves(bestParticle);
 	
 	float smallestDist = calcDist(bestParticle),tempDist, avgGenDist=0;
-	int genCount, i, a;
+	int genCount, i, a, mutationType=0;
 	
 	if(argc == 2){
 	
@@ -76,7 +78,17 @@ int main(int argc, char *argv[]){
 			
 			for(a=0;a<numParticles;a++){
 	
-				particles[a] = mutateMoves(bestParticle);
+				mutationType = rand()%3;
+				if( mutationType == 0 && a!=0){
+					particles[a] = singleMutation(particles[a]);
+				}
+				else if( mutationType == 1){
+					particles[a] = singleMutation(bestParticle);
+				}
+				else{
+					particles[a] = mutateMoves(bestParticle);
+				}
+				
 				particles[a] = execMoves(particles[a]);
 				tempDist = calcDist(particles[a]);
 				avgGenDist+=tempDist;
@@ -86,11 +98,13 @@ int main(int argc, char *argv[]){
 					bestParticle = particles[a];
 				}
 				
+				printMoveSet(particles[a]);
+				
 			}
 			
-			printf("__Best particle's move set so far__\n\n");
+			printf("\n__Best particle's move set so far__\n\n");
 			printMoveSet(bestParticle);
-			printf("\nAverage distance from goal:\t%f\n",(avgGenDist/numParticles));
+			printf("\nAvg distance from goal:\t%f\tBest Particle's distance:\t%f\n",(avgGenDist/numParticles),smallestDist);
 			
 			if( smallestDist == 0 ){
 				break;
@@ -134,7 +148,7 @@ Particle mutateMoves(Particle p){
 	
 	for(i=0;i<numMoves;i++){
 	
-		if( (rand()%2) == 1){
+		if( (rand()%3) == 0){
 		
 			p.moves[i] = rand()%numDifMoves;
 		
@@ -143,6 +157,15 @@ Particle mutateMoves(Particle p){
 	
 	return p;
 	
+}
+
+Particle singleMutation(Particle p){
+
+	int moveToChange = rand()%numMoves;
+	p.moves[moveToChange] = rand()%numDifMoves;
+	
+	return p;
+
 }
 
 Particle initParticle(Particle p){
@@ -226,6 +249,10 @@ Particle execMoves( Particle p ){ //all values are initialized, so all methods C
 			
 			case 10:
 				p = goalTeleY(p);
+				break;
+				
+			case 11:
+				p = resetTele(p);
 				break;
 				
 			default:
@@ -438,6 +465,10 @@ void printMoveSet(Particle p){
 				printf("goalTeleY\t");
 				break;
 				
+			case 11:
+				printf("resetTele\t");
+				break;
+				
 			default:
 				printf("doNothing\t");
 				break;
@@ -473,6 +504,15 @@ Particle goalTeleX( Particle p ){
 Particle goalTeleY( Particle p ){
 
 	p.teleY = goalY;
+	return p;
+
+}
+
+Particle resetTele( Particle p ){
+
+	p.teleX = 0;
+	p.teleY = 0;
+	
 	return p;
 
 }
