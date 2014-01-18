@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <time.h> 
 
-#define numMoves 8
-#define numParticles 5
-#define goalX -10
-#define goalY 5
+#define numMoves 14
+#define numParticles 4
+#define goalX 1
+#define goalY -23
 
 typedef enum{
 	LEFT,RIGHT,UP,DOWN
@@ -24,6 +24,7 @@ typedef struct{
 
 
 Particle makeMoveList(Particle p);
+Particle mutateMoves(Particle p);
 Particle initParticle(Particle p);
 Particle execMoves( Particle p );
 float calcDist(Particle p);
@@ -46,7 +47,11 @@ int main(int argc, char *argv[]){	//things to repair:: Main, printMoveSet, makeM
 	srand (time(NULL));
 	
 	Particle particles[numParticles], bestParticle;
-	float smallestDist = 100000,tempDist; //arbitrarily set smallest dist to large num that should be overwritten, hopefully
+	
+	bestParticle = makeMoveList(bestParticle);
+	bestParticle = execMoves(bestParticle);
+	
+	float smallestDist = calcDist(bestParticle),tempDist;
 	int genCount, i, a;
 	
 	if(argc == 2){
@@ -57,27 +62,31 @@ int main(int argc, char *argv[]){	//things to repair:: Main, printMoveSet, makeM
 	
 		for(i=0;i<genCount;i++){
 		
-			printf("\n\n====================Generation %d====================\n\n",i+1);
+			printf("\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=Generation %d=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n",i+1);
 			
 			for(a=0;a<numParticles;a++){
 	
-				particles[a] = makeMoveList(particles[a]);
-				printMoveSet(particles[a]);
+				particles[a] = mutateMoves(bestParticle);
 				particles[a] = execMoves(particles[a]);
-				printf("\nX: %d\tY: %d\t\n",particles[a].pX,particles[a].pY);
-				
 				tempDist = calcDist(particles[a]);
+				
 				if(tempDist<smallestDist){
 					smallestDist = tempDist;
 					bestParticle = particles[a];
-				
 				}
+				
 			}
-
+			
+			printf("__Best particle's move set so far__\n\n");
+			printMoveSet(bestParticle);
+			
+			if( smallestDist == 0 ){
+				break;
+			}
 			
 		}
 	
-		printf("Closest Dist: %f\n",smallestDist);
+		printf("\n\nClosest Dist: %f\n",smallestDist);
 		printMoveSet(bestParticle);
 		
 	}
@@ -103,6 +112,23 @@ Particle makeMoveList(Particle p){
 	}
 	
 	return p;
+}
+
+Particle mutateMoves(Particle p){
+
+	int i;
+	
+	for(i=0;i<numMoves;i++){
+	
+		if( (rand()%2) == 1){
+		
+			p.moves[i] = rand()%8;
+		
+		}	
+	}
+	
+	return p;
+	
 }
 
 Particle initParticle(Particle p){
@@ -169,7 +195,6 @@ Particle execMoves( Particle p ){ //all values are initialized, so all methods C
 				doNothing();
 			
 		}
-		printf("\nX: %d\tY: %d\t\n",p.pX,p.pY);
 	}
 	
 	return p;
