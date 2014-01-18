@@ -3,13 +3,14 @@
 #include <stdlib.h>
 #include <time.h> 
 
-#define numMoves 14
-#define numParticles 4
-#define goalX 1
-#define goalY -23
+#define numMoves 4
+#define numParticles 3
+#define goalX 21
+#define goalY -19
+#define numDifMoves 14
 
 typedef enum{
-	LEFT,RIGHT,UP,DOWN
+	LEFT=1,RIGHT,UP,DOWN
 } Direction;
 
 typedef struct{
@@ -19,6 +20,8 @@ typedef struct{
 	int moves[numMoves];
 	Direction dir;
 	int steps;
+	int teleX;
+	int teleY;
 	
 } Particle;
 
@@ -30,7 +33,7 @@ Particle execMoves( Particle p );
 float calcDist(Particle p);
 void printMoveSet(Particle p);
 
-//this is the order (from 1+) for the makeMoveSet method
+//this is the order (from 1+) for the makeMoveSet method, except doNothing is default so as to allow messing with the move pool
 //1st method is rand and so on
 Particle teleport(int x, int y, Particle p);
 Particle move(Particle p);
@@ -40,9 +43,16 @@ Particle genStepsRand(Particle p);
 Particle genDirByGoal(Particle p);
 Particle genStepsByDist(Particle p);
 void doNothing( void );
+//end of orig methods
+
+//added methods follow
+Particle randTeleX( Particle p );
+Particle randTeleY( Particle p );
+Particle goalTeleX( Particle p );
+Particle goalTeleY( Particle p );
 
 
-int main(int argc, char *argv[]){	//things to repair:: Main, printMoveSet, makeMoveList, and execMoves;
+int main(int argc, char *argv[]){
 
 	srand (time(NULL));
 	
@@ -51,7 +61,7 @@ int main(int argc, char *argv[]){	//things to repair:: Main, printMoveSet, makeM
 	bestParticle = makeMoveList(bestParticle);
 	bestParticle = execMoves(bestParticle);
 	
-	float smallestDist = calcDist(bestParticle),tempDist;
+	float smallestDist = calcDist(bestParticle),tempDist, avgGenDist=0;
 	int genCount, i, a;
 	
 	if(argc == 2){
@@ -69,6 +79,7 @@ int main(int argc, char *argv[]){	//things to repair:: Main, printMoveSet, makeM
 				particles[a] = mutateMoves(bestParticle);
 				particles[a] = execMoves(particles[a]);
 				tempDist = calcDist(particles[a]);
+				avgGenDist+=tempDist;
 				
 				if(tempDist<smallestDist){
 					smallestDist = tempDist;
@@ -79,10 +90,13 @@ int main(int argc, char *argv[]){	//things to repair:: Main, printMoveSet, makeM
 			
 			printf("__Best particle's move set so far__\n\n");
 			printMoveSet(bestParticle);
+			printf("\nAverage distance from goal:\t%f\n",(avgGenDist/numParticles));
 			
 			if( smallestDist == 0 ){
 				break;
 			}
+			
+			avgGenDist = 0.0;
 			
 		}
 	
@@ -107,7 +121,7 @@ Particle makeMoveList(Particle p){
 	
 	for(i=0;i<numMoves;i++){
 	
-		p.moves[i] = rand()%8;
+		p.moves[i] = rand()%numDifMoves;
 		
 	}
 	
@@ -122,7 +136,7 @@ Particle mutateMoves(Particle p){
 	
 		if( (rand()%2) == 1){
 		
-			p.moves[i] = rand()%8;
+			p.moves[i] = rand()%numDifMoves;
 		
 		}	
 	}
@@ -137,6 +151,8 @@ Particle initParticle(Particle p){
 	p.pY=0;
 	p.steps=1;
 	p.dir = LEFT;
+	p.teleX = 0;
+	p.teleY = 0;
 
 	return p;
 }
@@ -151,6 +167,11 @@ Particle genStepsRand(Particle p);
 Particle genDirByGoal(Particle p);
 Particle genStepsByDist(Particle p);
 void doNothing( void );
+
+Particle randTeleX( Particle p );
+Particle randTeleY( Particle p );
+Particle goalTeleX( Particle p );
+Particle goalTeleY( Particle p );
 */
 
 Particle execMoves( Particle p ){ //all values are initialized, so all methods CAN be executed, however some with multiple params may do nothing
@@ -164,7 +185,7 @@ Particle execMoves( Particle p ){ //all values are initialized, so all methods C
 		switch( p.moves[i] ){
 		
 			case 0:
-				p = teleport( 0,0,p); 
+				p = teleport( p.teleX,p.teleY,p); 
 				break;
 				
 			case 1:
@@ -192,8 +213,23 @@ Particle execMoves( Particle p ){ //all values are initialized, so all methods C
 				break;
 				
 			case 7:
-				doNothing();
+				p = randTeleX(p);
+				break;
+				
+			case 8:
+				p = randTeleY(p);
+				break;
 			
+			case 9:
+				p = goalTeleX(p);
+				break;
+			
+			case 10:
+				p = goalTeleY(p);
+				break;
+				
+			default:
+				doNothing();
 		}
 	}
 	
@@ -264,10 +300,15 @@ Particle genDirRand(Particle p){
 
 Particle randMove(Particle p){
 
+	Direction prevDir = p.dir;
+	int prevSteps = p.steps;
+	
 	p = genDirRand(p);
 	p = genStepsRand(p);
-	
 	p = move(p);
+	
+	p.dir = prevDir;
+	p.steps = prevSteps;
 	
 	return p;
 }
@@ -321,6 +362,7 @@ Particle genDirByGoal(Particle p){
 
 Particle genStepsByDist(Particle p){
 
+	Direction prevDir = p.dir;
 	p = genDirByGoal(p);
 	
 	if( p.dir == LEFT || p.dir == RIGHT ){
@@ -331,6 +373,7 @@ Particle genStepsByDist(Particle p){
 		p.steps = abs(goalY - p.pY);
 	}
 	
+	p.dir = prevDir;
 	return p;
 }
 
@@ -380,10 +423,56 @@ void printMoveSet(Particle p){
 				break;
 				
 			case 7:
+				printf("randTeleX\t");
+				break;
+				
+			case 8:
+				printf("randTeleY\t");
+				break;
+			
+			case 9:
+				printf("goalTeleX\t");
+				break;
+				
+			case 10:
+				printf("goalTeleY\t");
+				break;
+				
+			default:
 				printf("doNothing\t");
 				break;
 			
 		}
 	}	
 	printf("\n");
+}
+
+//=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-Added Methods start here =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+Particle randTeleX( Particle p ){
+
+	p.teleX = (rand()%21) - 10;
+	return p;
+
+}
+
+Particle randTeleY( Particle p ){
+
+	p.teleY = (rand()%21) - 10;
+	return p;
+
+}
+
+Particle goalTeleX( Particle p ){
+
+	p.teleX = goalX;
+	return p;
+
+}
+
+Particle goalTeleY( Particle p ){
+
+	p.teleY = goalY;
+	return p;
+
 }
