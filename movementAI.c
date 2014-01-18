@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <time.h> 
 
-#define numMoves 6
-#define numParticles 3
-#define goalX 3
-#define goalY 2
+#define numMoves 8
+#define numParticles 5
+#define goalX -10
+#define goalY 5
 
 typedef enum{
 	LEFT,RIGHT,UP,DOWN
@@ -24,6 +24,7 @@ typedef struct{
 
 
 Particle makeMoveList(Particle p);
+Particle initParticle(Particle p);
 Particle execMoves( Particle p );
 float calcDist(Particle p);
 void printMoveSet(Particle p);
@@ -47,16 +48,6 @@ int main(int argc, char *argv[]){	//things to repair:: Main, printMoveSet, makeM
 	Particle particles[numParticles], bestParticle;
 	float smallestDist = 100000,tempDist; //arbitrarily set smallest dist to large num that should be overwritten, hopefully
 	int genCount, i, a;
-	
-	
-	for(i=0;i<numParticles;i++){ //initialize starting position, direction, and # steps of all particles
-	
-		particles[i].pX = 1;
-		particles[i].pY = 1;
-		particles[i].dir = LEFT;
-		particles[i].steps = 0;
-		
-	}
 	
 	if(argc == 2){
 	
@@ -114,6 +105,16 @@ Particle makeMoveList(Particle p){
 	return p;
 }
 
+Particle initParticle(Particle p){
+
+	p.pX=0;
+	p.pY=0;
+	p.steps=1;
+	p.dir = LEFT;
+
+	return p;
+}
+
 /* for reference::
 
 Particle teleport(int x, int y, Particle p);
@@ -129,6 +130,8 @@ void doNothing( void );
 Particle execMoves( Particle p ){ //all values are initialized, so all methods CAN be executed, however some with multiple params may do nothing
 
 	int i;
+	
+	p = initParticle(p); //initialization of the particle so random crap isn't placed in the particle values
 	
 	for( i=0; i<numMoves; i++){
 	
@@ -166,6 +169,7 @@ Particle execMoves( Particle p ){ //all values are initialized, so all methods C
 				doNothing();
 			
 		}
+		printf("\nX: %d\tY: %d\t\n",p.pX,p.pY);
 	}
 	
 	return p;
