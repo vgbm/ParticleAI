@@ -2,56 +2,12 @@
 #include <math.h>
 #include <stdlib.h>
 #include <time.h> 
+#include "movementAI.h"
 
-#define numMoves 5
 #define numParticles 4
 #define goalX 21
 #define goalY -19
 #define numDifMoves 14
-
-typedef enum{
-	LEFT=1,RIGHT,UP,DOWN
-} Direction;
-
-typedef struct{
-
-	int pX;
-	int pY;
-	int moves[numMoves];
-	Direction dir;
-	int steps;
-	int teleX;
-	int teleY;
-	
-} Particle;
-
-//Various Meta methods
-Particle makeMoveList(Particle p);
-Particle mutateMoves(Particle p);
-Particle singleMutation(Particle p);
-Particle initParticle(Particle p);
-Particle execMoves( Particle p );
-float calcDist(Particle p);
-void printMoveSet(Particle p);
-
-//this is the order (from 1+) for the makeMoveSet method, except doNothing is default so as to allow messing with the move pool
-//1st method is rand and so on
-Particle teleport(int x, int y, Particle p);
-Particle move(Particle p);
-Particle genDirRand(Particle p);
-Particle randMove(Particle p);
-Particle genStepsRand(Particle p);
-Particle genDirByGoal(Particle p);
-Particle genStepsByDist(Particle p);
-void doNothing( void );
-//end of orig methods
-
-//added methods follow
-Particle randTeleX( Particle p );
-Particle randTeleY( Particle p );
-Particle goalTeleX( Particle p );
-Particle goalTeleY( Particle p );
-Particle resetTele( Particle p );
 
 
 int main(int argc, char *argv[]){
@@ -126,7 +82,10 @@ int main(int argc, char *argv[]){
 	return 0;
 }
 
-//=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-Methods start here =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+
+//=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-Meta methods=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
 
 
 Particle makeMoveList(Particle p){
@@ -179,23 +138,6 @@ Particle initParticle(Particle p){
 
 	return p;
 }
-
-/* for reference::
-
-Particle teleport(int x, int y, Particle p);
-Particle move(Particle p);
-Particle genDirRand(Particle p);
-Particle randMove(Particle p);
-Particle genStepsRand(Particle p);
-Particle genDirByGoal(Particle p);
-Particle genStepsByDist(Particle p);
-void doNothing( void );
-
-Particle randTeleX( Particle p );
-Particle randTeleY( Particle p );
-Particle goalTeleX( Particle p );
-Particle goalTeleY( Particle p );
-*/
 
 Particle execMoves( Particle p ){ //all values are initialized, so all methods CAN be executed, however some with multiple params may do nothing
 
@@ -263,6 +205,78 @@ Particle execMoves( Particle p ){ //all values are initialized, so all methods C
 	return p;
 
 }
+
+void printMoveSet(Particle p){
+
+	int i;
+	
+	for( i=0; i<numMoves; i++){
+	
+		switch( p.moves[i] ){
+		
+			case 0:
+				printf("teleport\t");
+				break;
+				
+			case 1:
+				printf("move\t");
+				break;
+				
+			case 2:
+				printf("genDirRand\t");
+				break;
+				
+			case 3:
+				printf("randMove\t");
+				break;
+				
+			case 4:
+				printf("genStepsRand\t");
+				break;
+				
+			case 5:
+				printf("genDirByGoal\t");
+				break;
+				
+			case 6:
+				printf("genStepsByDist\t");
+				break;
+				
+			case 7:
+				printf("randTeleX\t");
+				break;
+				
+			case 8:
+				printf("randTeleY\t");
+				break;
+			
+			case 9:
+				printf("goalTeleX\t");
+				break;
+				
+			case 10:
+				printf("goalTeleY\t");
+				break;
+				
+			case 11:
+				printf("resetTele\t");
+				break;
+				
+			default:
+				printf("doNothing\t");
+				break;
+			
+		}
+	}	
+	printf("\n");
+}
+
+
+
+//=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-Methods start here =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+
+
 
 Particle teleport(int x, int y, Particle p){ //need to figure out how to implement properly
 
@@ -413,72 +427,12 @@ float calcDist(Particle p){
 
 }
 
-void printMoveSet(Particle p){
 
-	int i;
-	
-	for( i=0; i<numMoves; i++){
-	
-		switch( p.moves[i] ){
-		
-			case 0:
-				printf("teleport\t");
-				break;
-				
-			case 1:
-				printf("move\t");
-				break;
-				
-			case 2:
-				printf("genDirRand\t");
-				break;
-				
-			case 3:
-				printf("randMove\t");
-				break;
-				
-			case 4:
-				printf("genStepsRand\t");
-				break;
-				
-			case 5:
-				printf("genDirByGoal\t");
-				break;
-				
-			case 6:
-				printf("genStepsByDist\t");
-				break;
-				
-			case 7:
-				printf("randTeleX\t");
-				break;
-				
-			case 8:
-				printf("randTeleY\t");
-				break;
-			
-			case 9:
-				printf("goalTeleX\t");
-				break;
-				
-			case 10:
-				printf("goalTeleY\t");
-				break;
-				
-			case 11:
-				printf("resetTele\t");
-				break;
-				
-			default:
-				printf("doNothing\t");
-				break;
-			
-		}
-	}	
-	printf("\n");
-}
 
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-Added Methods start here =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+
+
 
 Particle randTeleX( Particle p ){
 
